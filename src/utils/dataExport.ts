@@ -1,69 +1,42 @@
-import { UserSettings, MealEntry } from '../types';
+import { Food, MealEntry } from '../types';
 
-interface ExportOptions {
-  format: 'csv' | 'json';
-}
+export function exportMealsToCsv(meals: MealEntry[]): string {
+  const headers = [
+    'Date',
+    'Meal Type',
+    'Food Name',
+    'Servings',
+    'Calories',
+    'Protein (g)',
+    'Carbs (g)',
+    'Fat (g)'
+  ].join(',');
 
-export class DataExporter {
-  static exportMealEntries(entries: MealEntry[], options: ExportOptions = { format: 'csv' }) {
-    const data = entries.map(entry => ({
-      date: entry.date,
-      mealType: entry.type,
-      foods: entry.foods.map(food => ({
-        name: food.name,
-        calories: food.calories,
-        protein: food.protein,
-        carbs: food.carbs,
-        fat: food.fat,
-        servings: `${food.numberOfServings} ${food.servingUnit}`
-      }))
-    }));
+  const rows = meals.flatMap(meal => 
+    meal.foods.map(food => ({
+      date: meal.date,
+      type: meal.type,
+      name: food.name,
+      servings: `${food.number_of_servings} ${food.serving_unit}`,
+      calories: food.calories,
+      protein: food.protein,
+      carbs: food.carbs,
+      fat: food.fat
+    }))
+  );
 
-    if (options.format === 'csv') {
-      return this.convertToCSV(data);
-    }
+  const csvRows = rows.map(row => 
+    [
+      row.date,
+      row.type,
+      row.name,
+      row.servings,
+      row.calories,
+      row.protein,
+      row.carbs,
+      row.fat
+    ].join(',')
+  );
 
-    return JSON.stringify(data, null, 2);
-  }
-
-  static exportUserSettings(settings: UserSettings, options: ExportOptions = { format: 'csv' }) {
-    const data = {
-      dailyCalorieGoal: settings.dailyCalorieGoal,
-      proteinTarget: settings.proteinTarget,
-      carbsTarget: settings.carbsTarget,
-      fatTarget: settings.fatTarget
-    };
-
-    if (options.format === 'csv') {
-      return this.convertToCSV([data]);
-    }
-
-    return JSON.stringify(data, null, 2);
-  }
-
-  private static convertToCSV(data: any[]): string {
-    if (data.length === 0) return '';
-
-    const headers = Object.keys(data[0]);
-    const csvRows = [
-      headers.join(','),
-      ...data.map(row => 
-        headers.map(header => 
-          JSON.stringify(row[header])
-        ).join(',')
-      )
-    ];
-
-    return csvRows.join('\n');
-  }
-
-  static downloadFile(content: string, filename: string, mimeType: string) {
-    const blob = new Blob([content], { type: mimeType });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+  return [headers, ...csvRows].join('\n');
 } 

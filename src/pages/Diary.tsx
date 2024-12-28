@@ -41,38 +41,23 @@ const Diary: React.FC = () => {
 
       {/* Daily Summary */}
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          {format(selectedDate, 'MMMM d, yyyy')}
-        </h2>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-            <div>
-              <h3 className="font-medium">Total Calories</h3>
-              <p className="text-gray-600">
-                {Object.values(mealTotals).reduce((a, b) => a + b, 0)} / 2,000
-              </p>
-            </div>
-            <div className="w-32 h-2 bg-gray-200 rounded-full">
-              <div 
-                className="h-full bg-green-500 rounded-full" 
-                style={{ 
-                  width: `${Math.min(
-                    (Object.values(mealTotals).reduce((a, b) => a + b, 0) / 2000) * 100, 
-                    100
-                  )}%` 
-                }}
-              ></div>
-            </div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Daily Summary</h2>
+        <div className="grid grid-cols-4 gap-4">
+          <div>
+            <h3 className="text-sm font-medium text-gray-600">Breakfast</h3>
+            <p className="text-2xl font-semibold text-gray-900">{mealTotals.breakfast} cal</p>
           </div>
-          
-          {/* Macronutrient Summary */}
-          <div className="grid grid-cols-3 gap-4">
-            {['Protein', 'Carbs', 'Fat'].map((macro) => (
-              <div key={macro} className="p-3 bg-gray-50 rounded-lg">
-                <h4 className="text-sm font-medium">{macro}</h4>
-                <p className="text-gray-600">120g / 150g</p>
-              </div>
-            ))}
+          <div>
+            <h3 className="text-sm font-medium text-gray-600">Lunch</h3>
+            <p className="text-2xl font-semibold text-gray-900">{mealTotals.lunch} cal</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-600">Dinner</h3>
+            <p className="text-2xl font-semibold text-gray-900">{mealTotals.dinner} cal</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-600">Snacks</h3>
+            <p className="text-2xl font-semibold text-gray-900">{mealTotals.snacks} cal</p>
           </div>
         </div>
       </div>
@@ -104,7 +89,7 @@ const Diary: React.FC = () => {
                 <div>
                   <h3 className="font-medium">{food.name}</h3>
                   <p className="text-gray-600">
-                    {food.numberOfServings} × {food.servingSize}{food.servingUnit}
+                    {food.number_of_servings} × {food.serving_size}{food.serving_unit}
                   </p>
                 </div>
                 <div className="text-right">

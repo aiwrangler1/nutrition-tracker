@@ -1,62 +1,26 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { MealEntry } from '../types';
 
-export const useMealEntriesSubscription = (userId: string) => {
-  const [mealEntries, setMealEntries] = useState<MealEntry[]>([]);
-
+export function useRealtimeUpdates(onMealUpdate: (meal: MealEntry) => void) {
   useEffect(() => {
-    // Initial fetch
-    const fetchMealEntries = async () => {
-      const { data, error } = await supabase
-        .from('meal_entries')
-        .select('*, foods(*)')
-        .eq('userId', userId)
-        .eq('date', new Date().toISOString().split('T')[0]);
-
-      if (data) setMealEntries(data);
-    };
-
-    // Real-time subscription
     const subscription = supabase
       .channel('meal_entries')
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'meal_entries',
-          filter: `userId=eq.${userId}`
+        {
+          event: '*',
+          schema: 'public',
+          table: 'meal_entries'
         },
         (payload) => {
-          // Handle real-time updates
-          switch (payload.eventType) {
-            case 'INSERT':
-              setMealEntries(prev => [...prev, payload.new]);
-              break;
-            case 'UPDATE':
-              setMealEntries(prev => 
-                prev.map(entry => 
-                  entry.id === payload.new.id ? payload.new : entry
-                )
-              );
-              break;
-            case 'DELETE':
-              setMealEntries(prev => 
-                prev.filter(entry => entry.id !== payload.old.id)
-              );
-              break;
-          }
+          onMealUpdate(payload.new as MealEntry);
         }
       )
       .subscribe();
 
-    fetchMealEntries();
-
-    // Cleanup subscription
     return () => {
-      supabase.removeChannel(subscription);
+      subscription.unsubscribe();
     };
-  }, [userId]);
-
-  return mealEntries;
-}; 
+  }, [onMealUpdate]);
+} 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '../../lib/supabase';
 import { Food, MealEntry } from '../../types';
 import { format } from 'date-fns';
 
@@ -19,9 +19,9 @@ const MealEntryForm: React.FC<MealEntryFormProps> = ({
   const [foods, setFoods] = useState<Omit<Food, 'id'>[]>([
     {
       name: '',
-      servingSize: 100,
-      servingUnit: 'g',
-      numberOfServings: 1,
+      serving_size: 100,
+      serving_unit: 'g',
+      number_of_servings: 1,
       fat: 0,
       protein: 0,
       carbs: 0,
@@ -47,9 +47,9 @@ const MealEntryForm: React.FC<MealEntryFormProps> = ({
   const addFoodRow = () => {
     setFoods([...foods, {
       name: '',
-      servingSize: 100,
-      servingUnit: 'g',
-      numberOfServings: 1,
+      serving_size: 100,
+      serving_unit: 'g',
+      number_of_servings: 1,
       fat: 0,
       protein: 0,
       carbs: 0,
@@ -91,7 +91,7 @@ const MealEntryForm: React.FC<MealEntryFormProps> = ({
       if (foodError) throw foodError;
 
       // Notify parent component
-      if (onEntryAdded) {
+      if (onEntryAdded && mealEntryData) {
         onEntryAdded({
           ...mealEntryData,
           foods: foodInserts as Food[]
@@ -126,14 +126,14 @@ const MealEntryForm: React.FC<MealEntryFormProps> = ({
               <input
                 type="number"
                 placeholder="Serving Size"
-                value={food.servingSize}
-                onChange={(e) => handleFoodChange(index, { servingSize: Number(e.target.value) })}
+                value={food.serving_size}
+                onChange={(e) => handleFoodChange(index, { serving_size: Number(e.target.value) })}
                 className="rounded-md border-gray-300"
                 required
               />
               <select
-                value={food.servingUnit}
-                onChange={(e) => handleFoodChange(index, { servingUnit: e.target.value })}
+                value={food.serving_unit}
+                onChange={(e) => handleFoodChange(index, { serving_unit: e.target.value })}
                 className="rounded-md border-gray-300"
               >
                 <option value="g">g</option>
@@ -143,8 +143,8 @@ const MealEntryForm: React.FC<MealEntryFormProps> = ({
               <input
                 type="number"
                 placeholder="Servings"
-                value={food.numberOfServings}
-                onChange={(e) => handleFoodChange(index, { numberOfServings: Number(e.target.value) })}
+                value={food.number_of_servings}
+                onChange={(e) => handleFoodChange(index, { number_of_servings: Number(e.target.value) })}
                 className="rounded-md border-gray-300"
                 required
               />

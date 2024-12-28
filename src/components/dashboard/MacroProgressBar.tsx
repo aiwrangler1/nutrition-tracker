@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserSettings } from '../types';
+import { UserSettings } from '../../types';
 
 interface MacroProgressBarProps {
   userSettings: UserSettings;
@@ -11,39 +11,75 @@ interface MacroProgressBarProps {
   };
 }
 
-const MacroProgressBar: React.FC<MacroProgressBarProps> = ({ 
-  userSettings, 
-  currentMacros 
-}) => {
-  const calculatePercentage = (current: number, target: number) => 
-    Math.min((current / target) * 100, 100);
+const calculatePercentage = (current: number, target: number): number => {
+  if (target <= 0) return 0;
+  return Math.min((current / target) * 100, 100);
+};
 
+const MacroProgressBar: React.FC<MacroProgressBarProps> = ({ userSettings, currentMacros }) => {
   return (
-    <div className="macro-progress-container">
-      <div className="macro-progress">
-        <div 
-          className="progress-bar calories" 
-          style={{ width: `${calculatePercentage(currentMacros.calories, userSettings.dailyCalorieGoal)}%` }}
-        >
-          Calories: {currentMacros.calories} / {userSettings.dailyCalorieGoal}
+    <div className="space-y-4">
+      {/* Calories Progress */}
+      <div>
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Calories</span>
+          <span>{currentMacros.calories} / {userSettings.daily_calorie_goal}</span>
         </div>
-        <div 
-          className="progress-bar protein" 
-          style={{ width: `${calculatePercentage(currentMacros.protein, userSettings.proteinTarget)}%` }}
-        >
-          Protein: {currentMacros.protein} / {userSettings.proteinTarget}g
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-green-500 rounded-full"
+            style={{
+              width: `${calculatePercentage(currentMacros.calories, userSettings.daily_calorie_goal)}%`
+            }}
+          ></div>
         </div>
-        <div 
-          className="progress-bar carbs" 
-          style={{ width: `${calculatePercentage(currentMacros.carbs, userSettings.carbsTarget)}%` }}
-        >
-          Carbs: {currentMacros.carbs} / {userSettings.carbsTarget}g
+      </div>
+
+      {/* Protein Progress */}
+      <div>
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Protein</span>
+          <span>{currentMacros.protein} / {userSettings.protein_target}g</span>
         </div>
-        <div 
-          className="progress-bar fat" 
-          style={{ width: `${calculatePercentage(currentMacros.fat, userSettings.fatTarget)}%` }}
-        >
-          Fat: {currentMacros.fat} / {userSettings.fatTarget}g
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-blue-500 rounded-full"
+            style={{
+              width: `${calculatePercentage(currentMacros.protein, userSettings.protein_target)}%`
+            }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Carbs Progress */}
+      <div>
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Carbs</span>
+          <span>{currentMacros.carbs} / {userSettings.carbs_target}g</span>
+        </div>
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-yellow-500 rounded-full"
+            style={{
+              width: `${calculatePercentage(currentMacros.carbs, userSettings.carbs_target)}%`
+            }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Fat Progress */}
+      <div>
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Fat</span>
+          <span>{currentMacros.fat} / {userSettings.fat_target}g</span>
+        </div>
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-red-500 rounded-full"
+            style={{
+              width: `${calculatePercentage(currentMacros.fat, userSettings.fat_target)}%`
+            }}
+          ></div>
         </div>
       </div>
     </div>

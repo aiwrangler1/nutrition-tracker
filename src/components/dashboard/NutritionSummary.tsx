@@ -1,9 +1,10 @@
 import React from 'react';
-import { calculateProgress } from '../../utils/calculations';
-import { useSettings } from '../../hooks/useSettings';
+import { UserSettings } from '../../types';
+import MacroProgressBar from './MacroProgressBar';
 
-interface NutritionProps {
-  consumed: {
+interface NutritionSummaryProps {
+  settings: UserSettings;
+  currentMacros: {
     calories: number;
     protein: number;
     carbs: number;
@@ -11,67 +12,54 @@ interface NutritionProps {
   };
 }
 
-export default function NutritionSummary({ consumed }: NutritionProps) {
-  const { settings } = useSettings();
-  
-  if (!settings) return null;
-
-  const metrics = [
+const NutritionSummary: React.FC<NutritionSummaryProps> = ({ settings, currentMacros }) => {
+  const macroData = [
     {
       label: 'Calories',
-      consumed: consumed.calories,
-      target: settings.dailyCalorieGoal,
-      unit: 'kcal',
-      bgColor: 'bg-green-50',
-      progressColor: 'bg-green-600',
+      current: currentMacros.calories,
+      target: settings.daily_calorie_goal,
+      unit: 'kcal'
     },
     {
       label: 'Protein',
-      consumed: consumed.protein,
-      target: settings.proteinTarget,
-      unit: 'g',
-      bgColor: 'bg-blue-50',
-      progressColor: 'bg-blue-600',
+      current: currentMacros.protein,
+      target: settings.protein_target,
+      unit: 'g'
     },
     {
       label: 'Carbs',
-      consumed: consumed.carbs,
-      target: settings.carbsTarget,
-      unit: 'g',
-      bgColor: 'bg-yellow-50',
-      progressColor: 'bg-yellow-600',
+      current: currentMacros.carbs,
+      target: settings.carbs_target,
+      unit: 'g'
     },
     {
       label: 'Fat',
-      consumed: consumed.fat,
-      target: settings.fatTarget,
-      unit: 'g',
-      bgColor: 'bg-red-50',
-      progressColor: 'bg-red-600',
-    },
+      current: currentMacros.fat,
+      target: settings.fat_target,
+      unit: 'g'
+    }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {metrics.map((metric) => (
-        <div key={metric.label} className={`${metric.bgColor} p-4 rounded-lg`}>
-          <h3 className="text-sm font-medium text-gray-800">{metric.label}</h3>
-          <div className="mt-2">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>{metric.consumed} / {metric.target} {metric.unit}</span>
-              <span>{calculateProgress(metric.consumed, metric.target)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-              <div
-                className={`${metric.progressColor} h-2.5 rounded-full`}
-                style={{
-                  width: `${calculateProgress(metric.consumed, metric.target)}%`
-                }}
-              />
-            </div>
-          </div>
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Daily Progress</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <MacroProgressBar userSettings={settings} currentMacros={currentMacros} />
         </div>
-      ))}
+        <div className="grid grid-cols-2 gap-4">
+          {macroData.map((macro) => (
+            <div key={macro.label} className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-gray-600">{macro.label}</h3>
+              <p className="text-2xl font-semibold text-gray-900">
+                {macro.current} / {macro.target} {macro.unit}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default NutritionSummary;

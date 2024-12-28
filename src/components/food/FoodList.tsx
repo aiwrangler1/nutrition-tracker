@@ -41,7 +41,7 @@ export default function FoodList({ foods, onFoodDeleted }: FoodListProps) {
           <div>
             <h4 className="font-medium text-gray-900">{food.name}</h4>
             <p className="text-sm text-gray-600">
-              {food.numberOfServings} × {food.servingSize}{food.servingUnit} 
+              {food.number_of_servings} × {food.serving_size}{food.serving_unit} 
               • {food.calories} kcal
             </p>
           </div>
@@ -51,7 +51,7 @@ export default function FoodList({ foods, onFoodDeleted }: FoodListProps) {
             </p>
             <button
               onClick={() => handleDelete(food.id)}
-              className="text-red-600 hover:text-red-700"
+              className="text-red-500 hover:text-red-700"
             >
               <Trash2 size={18} />
             </button>

@@ -3,73 +3,82 @@ import { format } from 'date-fns';
 import MealSection from '../components/food/MealSection';
 import NutritionSummary from '../components/dashboard/NutritionSummary';
 import { useMeals } from '../hooks/useMeals';
-import { useDailyNutrition } from '../hooks/useDailyNutrition';
+import { useSettings } from '../hooks/useSettings';
 
-export default function Dashboard() {
-  const today = useMemo(() => new Date(), []);
-  const { meals, loading } = useMeals(today);
+const Dashboard: React.FC = () => {
+  const { meals, loading, error } = useMeals(new Date());
+  const { settings } = useSettings();
 
-  const allFoods = useMemo(() => 
-    meals.flatMap(meal => meal.foods || []),
-    [meals]
-  );
-
-  const nutritionTotals = useDailyNutrition(allFoods);
-
-  const mealFoods = useMemo(() => {
-    const foodsByMeal = {
-      breakfast: [] as typeof allFoods,
-      lunch: [] as typeof allFoods,
-      dinner: [] as typeof allFoods,
-      snacks: [] as typeof allFoods,
-    };
-
-    meals.forEach(meal => {
-      if (meal.foods) {
-        foodsByMeal[meal.type as keyof typeof foodsByMeal].push(...meal.foods);
-      }
+  const nutritionTotals = useMemo(() => {
+    return meals.reduce((totals, meal) => {
+      meal.foods.forEach(food => {
+        totals.calories += food.calories;
+        totals.protein += food.protein;
+        totals.carbs += food.carbs;
+        totals.fat += food.fat;
+      });
+      return totals;
+    }, {
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0
     });
-
-    return foodsByMeal;
   }, [meals]);
 
-  const handleFoodChange = useCallback(() => {
-    // The useMeals hook will automatically refresh the data
-    // due to the Supabase real-time subscription
+  const handleFoodAdded = useCallback(() => {
+    // Refresh meals
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    );
-  }
+  const handleFoodDeleted = useCallback(() => {
+    // Refresh meals
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error loading meals</div>;
+  if (!settings) return <div>Loading settings...</div>;
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Today's Progress
-          </h1>
-          <div className="text-gray-600">
-            {format(today, 'EEEE, MMMM d, yyyy')}
-          </div>
-        </div>
-        
-        <NutritionSummary consumed={nutritionTotals} />
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Dashboard - {format(new Date(), 'MMMM d, yyyy')}
+        </h1>
       </div>
 
-      {Object.entries(mealFoods).map(([type, foods]) => (
+      <NutritionSummary
+        settings={settings}
+        currentMacros={nutritionTotals}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <MealSection
-          key={type}
-          title={type.charAt(0).toUpperCase() + type.slice(1)}
-          foods={foods}
-          onFoodAdded={handleFoodChange}
-          onFoodDeleted={handleFoodChange}
+          title="Breakfast"
+          foods={meals.filter(m => m.type === 'breakfast').flatMap(m => m.foods)}
+          onFoodAdded={handleFoodAdded}
+          onFoodDeleted={handleFoodDeleted}
         />
-      ))}
+        <MealSection
+          title="Lunch"
+          foods={meals.filter(m => m.type === 'lunch').flatMap(m => m.foods)}
+          onFoodAdded={handleFoodAdded}
+          onFoodDeleted={handleFoodDeleted}
+        />
+        <MealSection
+          title="Dinner"
+          foods={meals.filter(m => m.type === 'dinner').flatMap(m => m.foods)}
+          onFoodAdded={handleFoodAdded}
+          onFoodDeleted={handleFoodDeleted}
+        />
+        <MealSection
+          title="Snacks"
+          foods={meals.filter(m => m.type === 'snacks').flatMap(m => m.foods)}
+          onFoodAdded={handleFoodAdded}
+          onFoodDeleted={handleFoodDeleted}
+        />
+      </div>
     </div>
   );
-}
+};
+
+export default Dashboard;

@@ -11,74 +11,76 @@ interface MacroProgressBarProps {
   };
 }
 
-const MacroProgressBar: React.FC<MacroProgressBarProps> = ({ 
-  userSettings, 
-  currentMacros 
-}) => {
-  const calculatePercentage = (current: number, target: number) => {
-    return Math.min((current / target) * 100, 100);
-  };
+const calculatePercentage = (current: number, target: number): number => {
+  if (target <= 0) return 0;
+  return Math.min((current / target) * 100, 100);
+};
 
+const MacroProgressBar: React.FC<MacroProgressBarProps> = ({ userSettings, currentMacros }) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center">
-        <span className="mr-2">Calories:</span>
-        <div className="flex-grow bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-blue-600 h-2.5 rounded-full progress-bar" 
-            style={{ 
-              width: `${calculatePercentage(currentMacros.calories, userSettings.dailyCalorieGoal)}%` 
-            }}
-          />
+      {/* Calories Progress */}
+      <div>
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Calories</span>
+          <span>{currentMacros.calories} / {userSettings.daily_calorie_goal}</span>
         </div>
-        <span className="ml-2">
-          {currentMacros.calories} / {userSettings.dailyCalorieGoal}
-        </span>
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-green-500 rounded-full"
+            style={{
+              width: `${calculatePercentage(currentMacros.calories, userSettings.daily_calorie_goal)}%`
+            }}
+          ></div>
+        </div>
       </div>
 
-      <div className="flex items-center">
-        <span className="mr-2">Protein:</span>
-        <div className="flex-grow bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-green-600 h-2.5 rounded-full progress-bar" 
-            style={{ 
-              width: `${calculatePercentage(currentMacros.protein, userSettings.proteinTarget)}%` 
-            }}
-          />
+      {/* Protein Progress */}
+      <div>
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Protein</span>
+          <span>{currentMacros.protein} / {userSettings.protein_target}g</span>
         </div>
-        <span className="ml-2">
-          {currentMacros.protein} / {userSettings.proteinTarget}g
-        </span>
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-blue-500 rounded-full"
+            style={{
+              width: `${calculatePercentage(currentMacros.protein, userSettings.protein_target)}%`
+            }}
+          ></div>
+        </div>
       </div>
 
-      <div className="flex items-center">
-        <span className="mr-2">Carbs:</span>
-        <div className="flex-grow bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-yellow-600 h-2.5 rounded-full progress-bar" 
-            style={{ 
-              width: `${calculatePercentage(currentMacros.carbs, userSettings.carbsTarget)}%` 
-            }}
-          />
+      {/* Carbs Progress */}
+      <div>
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Carbs</span>
+          <span>{currentMacros.carbs} / {userSettings.carbs_target}g</span>
         </div>
-        <span className="ml-2">
-          {currentMacros.carbs} / {userSettings.carbsTarget}g
-        </span>
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-yellow-500 rounded-full"
+            style={{
+              width: `${calculatePercentage(currentMacros.carbs, userSettings.carbs_target)}%`
+            }}
+          ></div>
+        </div>
       </div>
 
-      <div className="flex items-center">
-        <span className="mr-2">Fat:</span>
-        <div className="flex-grow bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-red-600 h-2.5 rounded-full progress-bar" 
-            style={{ 
-              width: `${calculatePercentage(currentMacros.fat, userSettings.fatTarget)}%` 
-            }}
-          />
+      {/* Fat Progress */}
+      <div>
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Fat</span>
+          <span>{currentMacros.fat} / {userSettings.fat_target}g</span>
         </div>
-        <span className="ml-2">
-          {currentMacros.fat} / {userSettings.fatTarget}g
-        </span>
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-full bg-red-500 rounded-full"
+            style={{
+              width: `${calculatePercentage(currentMacros.fat, userSettings.fat_target)}%`
+            }}
+          ></div>
+        </div>
       </div>
     </div>
   );
