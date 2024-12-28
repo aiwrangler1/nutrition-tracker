@@ -1,13 +1,14 @@
 export interface Food {
   id: string;
   name: string;
-  servingSize: number;
-  servingUnit: string;
-  numberOfServings: number;
+  serving_size: number;
+  serving_unit: string;
+  number_of_servings: number;
   fat: number;
   protein: number;
   carbs: number;
   calories: number;
+  meal_entry_id?: string;
 }
 
 export interface MealEntry {
@@ -15,15 +16,15 @@ export interface MealEntry {
   type: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
   foods: Food[];
   date: string;
-  userId: string;
+  user_id: string;
 }
 
 export interface UserSettings {
   id: string;
-  userId: string;
-  dailyCalorieGoal: number;
-  proteinTarget: number;
-  carbsTarget: number;
-  fatTarget: number;
+  user_id: string;
+  daily_calorie_goal: number;
+  protein_target: number;
+  carbs_target: number;
+  fat_target: number;
   notes?: string;
 }

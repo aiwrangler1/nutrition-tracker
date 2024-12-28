@@ -148,3 +148,62 @@ CREATE POLICY "Users can delete foods from their meal entries"
       AND meal_entries.user_id = auth.uid()
     )
   );
+
+-- Add real-time publication for key tables
+CREATE PUBLICATION meal_tracker_publication 
+FOR TABLE meal_entries, foods, users_settings;
+
+-- Function to get daily nutrition summary
+CREATE OR REPLACE FUNCTION get_daily_nutrition_summary(
+  target_user_id uuid, 
+  target_date date DEFAULT CURRENT_DATE
+)
+RETURNS TABLE (
+  total_calories numeric,
+  total_protein numeric,
+  total_carbs numeric,
+  total_fat numeric,
+  daily_calorie_goal integer,
+  protein_target integer,
+  carbs_target integer,
+  fat_target integer
+) AS $$
+BEGIN
+  RETURN QUERY
+  WITH nutrition_totals AS (
+    SELECT 
+      COALESCE(SUM(f.calories), 0) as total_calories,
+      COALESCE(SUM(f.protein), 0) as total_protein,
+      COALESCE(SUM(f.carbs), 0) as total_carbs,
+      COALESCE(SUM(f.fat), 0) as total_fat
+    FROM meal_entries me
+    JOIN foods f ON f.meal_entry_id = me.id
+    WHERE me.user_id = target_user_id AND me.date = target_date
+  )
+  SELECT 
+    nt.total_calories,
+    nt.total_protein,
+    nt.total_carbs,
+    nt.total_fat,
+    us.daily_calorie_goal,
+    us.protein_target,
+    us.carbs_target,
+    us.fat_target
+  FROM nutrition_totals nt, users_settings us
+  WHERE us.user_id = target_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to track query performance
+CREATE OR REPLACE FUNCTION log_query_performance(
+  query_name text, 
+  execution_time interval
+)
+RETURNS void AS $$
+BEGIN
+  INSERT INTO query_performance_logs 
+  (query_name, execution_time, logged_at)
+  VALUES 
+  (query_name, execution_time, NOW());
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -39,3 +39,12 @@ lerna-debug.log*
 # Misc
 *.local
 .eslintcache
+
+# Project Management & Agents
+.crew/
+crew/
+agents/
+*-tasks.md
+project-log.md
+pm-agent.md
+roadmap.md

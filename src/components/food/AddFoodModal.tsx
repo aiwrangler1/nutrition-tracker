@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Food } from '../../types';
 import { calculateCalories } from '../../utils/calculations';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AddFoodModalProps {
   mealType: string;
@@ -10,12 +11,24 @@ interface AddFoodModalProps {
   onFoodAdded: () => void;
 }
 
+type NewFood = {
+  name: string;
+  serving_size: number;
+  serving_unit: string;
+  number_of_servings: number;
+  fat: number;
+  protein: number;
+  carbs: number;
+  calories: number;
+};
+
 const AddFoodModal: React.FC<AddFoodModalProps> = ({ mealType, onClose, onFoodAdded }) => {
-  const [food, setFood] = useState<Omit<Food, 'id'>>({
+  const { user } = useAuth();
+  const [food, setFood] = useState<NewFood>({
     name: '',
-    servingSize: 100,
-    servingUnit: 'g',
-    numberOfServings: 1,
+    serving_size: 100,
+    serving_unit: 'g',
+    number_of_servings: 1,
     fat: 0,
     protein: 0,
     carbs: 0,
@@ -24,7 +37,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({ mealType, onClose, onFoodAd
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const numberFields = ['servingSize', 'numberOfServings', 'fat', 'protein', 'carbs'];
+    const numberFields = ['serving_size', 'number_of_servings', 'fat', 'protein', 'carbs'];
     
     setFood(prev => {
       const newFood = {
@@ -44,11 +57,20 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({ mealType, onClose, onFoodAd
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) {
+      console.error('No user found');
+      return;
+    }
+
     try {
       // First create the meal entry
       const { data: mealEntry, error: mealError } = await supabase
         .from('meal_entries')
-        .insert([{ type: mealType.toLowerCase() }])
+        .insert([{ 
+          type: mealType.toLowerCase(),
+          user_id: user.id,
+          date: new Date().toISOString().split('T')[0]
+        }])
         .select()
         .single();
 
@@ -62,6 +84,7 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({ mealType, onClose, onFoodAd
       if (foodError) throw foodError;
 
       onFoodAdded();
+      onClose();
     } catch (error) {
       console.error('Error adding food:', error);
       // TODO: Show error message to user
@@ -96,29 +119,29 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({ mealType, onClose, onFoodAd
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="servingSize" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="serving_size" className="block text-sm font-medium text-gray-700">
                 Serving Size
               </label>
               <input
                 type="number"
-                id="servingSize"
-                name="servingSize"
+                id="serving_size"
+                name="serving_size"
                 required
                 min="0"
-                value={food.servingSize}
+                value={food.serving_size}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
               />
             </div>
 
             <div>
-              <label htmlFor="servingUnit" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="serving_unit" className="block text-sm font-medium text-gray-700">
                 Unit
               </label>
               <select
-                id="servingUnit"
-                name="servingUnit"
-                value={food.servingUnit}
+                id="serving_unit"
+                name="serving_unit"
+                value={food.serving_unit}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
               >
@@ -131,17 +154,17 @@ const AddFoodModal: React.FC<AddFoodModalProps> = ({ mealType, onClose, onFoodAd
           </div>
 
           <div>
-            <label htmlFor="numberOfServings" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="number_of_servings" className="block text-sm font-medium text-gray-700">
               Number of Servings
             </label>
             <input
               type="number"
-              id="numberOfServings"
-              name="numberOfServings"
+              id="number_of_servings"
+              name="number_of_servings"
               required
               min="0"
               step="0.1"
-              value={food.numberOfServings}
+              value={food.number_of_servings}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
             />
