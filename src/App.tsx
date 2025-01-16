@@ -1,60 +1,70 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import GlobalErrorBoundary from './components/GlobalErrorBoundary';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from './components/ErrorBoundary';
+import { FoodItemSkeleton, NutritionSummarySkeleton } from './components/ui/Skeleton';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
+import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
-import { SettingsProvider } from './contexts/SettingsContext';
-import { AuthProvider } from './contexts/AuthContext';
 
-// Lazy load pages
+// Lazy load components
 const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Diary = lazy(() => import('./pages/Diary'));
+const Auth = lazy(() => import('./pages/Auth'));
 const Settings = lazy(() => import('./pages/Settings'));
 
-const Layout = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen bg-gray-100">
-    <nav className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex space-x-8">
-            <Link to="/" className="flex items-center px-3 py-2 text-gray-700 hover:text-gray-900">
-              Dashboard
-            </Link>
-            <Link to="/diary" className="flex items-center px-3 py-2 text-gray-700 hover:text-gray-900">
-              Diary
-            </Link>
-            <Link to="/settings" className="flex items-center px-3 py-2 text-gray-700 hover:text-gray-900">
-              Settings
-            </Link>
-          </div>
-        </div>
-      </div>
-    </nav>
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {children}
-    </main>
-  </div>
-);
-
-const App: React.FC = () => {
+function App() {
   return (
-    <Router>
-      <GlobalErrorBoundary>
-        <AuthProvider>
-          <SettingsProvider>
-            <Layout>
-              <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                  <Route path="/diary" element={<Diary />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/" element={<Dashboard />} />
-                </Routes>
-              </Suspense>
-            </Layout>
-          </SettingsProvider>
-        </AuthProvider>
-      </GlobalErrorBoundary>
-    </Router>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#363636',
+                color: '#fff',
+              },
+              success: {
+                duration: 3000,
+                iconTheme: {
+                  primary: '#22c55e',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                duration: 4000,
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
-};
+}
 
 export default App;

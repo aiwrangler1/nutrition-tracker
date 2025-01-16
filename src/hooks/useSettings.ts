@@ -1,64 +1,81 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '../lib/supabase';
 import { UserSettings } from '../types';
 import { useAuth } from '../lib/auth';
-import { asyncErrorHandler } from '../utils/asyncErrorHandler';
+import toast from 'react-hot-toast';
 
 export function useSettings() {
   const { user } = useAuth();
-  const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = ['settings', user?.id];
 
-  useEffect(() => {
-    if (!user) return;
+  const { data: settings, isLoading, error } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      if (!user) return null;
 
-    const fetchSettings = async () => {
-      const result = await asyncErrorHandler(
-        async () => {
-          const { data, error } = await supabase
-            .from('users_settings')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
+      const { data, error } = await supabase
+        .from('users_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-          if (error) throw error;
-          return data;
-        },
-        { userId: user.id, operation: 'fetchSettings' }
-      );
+      if (error) throw error;
 
-      if (result) {
-        setSettings(result);
-      }
-      setLoading(false);
-    };
+      // If no settings exist, create default settings
+      if (!data) {
+        const defaultSettings: Omit<UserSettings, 'id'> = {
+          user_id: user.id,
+          daily_calorie_goal: 2000,
+          protein_target: 150,
+          carbs_target: 250,
+          fat_target: 70,
+          notes: '',
+        };
 
-    fetchSettings();
-  }, [user]);
-
-  const updateSettings = async (newSettings: Partial<UserSettings>) => {
-    if (!user) return;
-
-    const result = await asyncErrorHandler(
-      async () => {
-        const { error } = await supabase
+        const { data: newSettings, error: createError } = await supabase
           .from('users_settings')
-          .upsert({
-            user_id: user.id,
-            ...newSettings
-          });
+          .insert([defaultSettings])
+          .select()
+          .single();
 
-        if (error) throw error;
-        setSettings(prev => prev ? { ...prev, ...newSettings } : null);
-      },
-      { 
-        userId: user.id, 
-        operation: 'updateSettings',
-        settings: newSettings 
+        if (createError) throw createError;
+        return newSettings;
       }
-    );
-  };
 
-  return { settings, loading, error, updateSettings };
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const updateSettings = useMutation({
+    mutationFn: async (newSettings: Partial<UserSettings>) => {
+      if (!user || !settings) throw new Error('User not authenticated or settings not found');
+
+      const { data, error } = await supabase
+        .from('users_settings')
+        .update(newSettings)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKey, data);
+      toast.success('Settings updated successfully');
+    },
+    onError: (error) => {
+      console.error('Error updating settings:', error);
+      toast.error('Failed to update settings');
+    },
+  });
+
+  return {
+    settings,
+    isLoading,
+    error,
+    updateSettings,
+  };
 }

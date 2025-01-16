@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Calendar, Settings } from 'lucide-react';
 import NavLink from './NavLink';
+import AuthButton from './AuthButton';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
@@ -14,10 +15,11 @@ const Navigation: React.FC = () => {
             NutriTrack
           </Link>
           
-          <div className="flex space-x-4">
+          <div className="flex items-center space-x-4">
             <NavLink to="/" icon={<Home size={20} />} label="Dashboard" />
             <NavLink to="/diary" icon={<Calendar size={20} />} label="Diary" />
             <NavLink to="/settings" icon={<Settings size={20} />} label="Settings" />
+            <AuthButton />
           </div>
         </div>
       </div>

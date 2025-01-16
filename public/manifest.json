@@ -1,0 +1,51 @@
+{
+  "short_name": "Nutrition",
+  "name": "Nutrition Tracker",
+  "description": "Track your daily nutrition and macros",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#16a34a",
+  "background_color": "#f9fafb",
+  "orientation": "portrait",
+  "categories": ["food", "health", "fitness"],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Dashboard showing daily nutrition progress"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Food",
+      "url": "/?action=add-food",
+      "description": "Quickly add a food item"
+    },
+    {
+      "name": "View Progress",
+      "url": "/?view=progress",
+      "description": "View your nutrition progress"
+    }
+  ]
+} 
