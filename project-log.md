@@ -167,3 +167,56 @@ We're building a web application that allows users to:
 - Additional Integrations: Barcode scanner, public nutrition databases
 - Push Notifications: Reminders to log meals
 
+## Project Structure Guidelines
+
+### Directory Structure
+```
+my-meal-logger/
+├─ pages/
+│  ├─ api/                       # Serverless functions
+│  │  └─ auth/
+│  │      └─ [...supabase].js    # Custom Supabase auth routes
+│  ├─ meals.js                   # API for handling meal data
+│  ├─ _app.js                    # Global wrapper for styles and Ant Design
+│  ├─ index.js                   # Landing/sign-in screen
+│  ├─ dashboard.js               # Dashboard view with meal logs and progress
+│  └─ settings.js                # Goals configuration page
+├─ components/
+│  ├─ Layout.js                  # Global wrapper structure
+│  ├─ NavBar.js                  # Reusable navigation component
+│  ├─ MealForm.js                # Meal entry form
+│  └─ MacrosChart.js             # Macro tracking visualization
+├─ lib/
+│  └─ supabaseClient.js          # Supabase client initialization
+├─ styles/
+│  └─ globals.css                # Global application styles
+├─ .env.local                    # Local environment variables
+├─ package.json                  # Project dependencies and scripts
+└─ README.md                     # Project documentation
+```
+
+### Folder Management Guidelines
+1. Strict Folder Structure
+   - No custom subfolders in `/components/`, `/pages/`, or `lib/`
+   - Only add folders for core functionality or new reusable components
+   - Minimize file count in each directory
+
+2. Component Creation Rules
+   - Components must be truly reusable
+   - Avoid creating components for single-use scenarios
+   - Keep component logic minimal and focused
+
+3. File Addition Policy
+   - Any new files must align with core project functionality
+   - Require explicit approval before adding
+   - Maintain clean, purposeful codebase
+
+4. Naming Conventions
+   - Use clear, descriptive names
+   - Follow camelCase for JavaScript/TypeScript files
+   - Use PascalCase for React component files
+
+### Enforcement
+- Regular code reviews to maintain structure
+- Automated linting and structure checks
+- Immediate removal of unnecessary files
