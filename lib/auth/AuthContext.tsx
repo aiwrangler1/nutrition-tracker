@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
+import { authLogger } from '../utils/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -40,17 +41,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Add error logging utility
-  const logAuthError = (method: string, error: AuthError | null) => {
-    if (error) {
-      console.error(`Authentication Error in ${method}:`, {
-        message: error.message,
-        code: error.code,
-        timestamp: new Date().toISOString()
-      });
-    }
-  };
-
   const value = {
     user,
     loading,
@@ -59,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
-      logAuthError('signIn', error);
+      authLogger.logAuthError('signIn', error);
       return { 
         error,
         errorMessage: error ? getErrorMessage(error) : null 
@@ -70,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
-      logAuthError('signUp', error);
+      authLogger.logAuthError('signUp', error);
       return { 
         error,
         needsEmailVerification: data.user?.email_confirmed_at === null,
@@ -86,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         
-        logAuthError('resetPassword', error);
+        authLogger.logAuthError('resetPassword', error);
         
         return { 
           error,
@@ -94,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
       } catch (err) {
         const error = err as AuthError;
-        logAuthError('resetPassword', error);
+        authLogger.logAuthError('resetPassword', error);
         return { 
           error,
           errorMessage: error.message || 'Failed to send reset password email' 
