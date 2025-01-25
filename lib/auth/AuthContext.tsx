@@ -10,7 +10,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string) => Promise<{ error: AuthError | null, needsEmailVerification?: boolean }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   updatePassword: (password: string) => Promise<{ error: AuthError | null }>;
   resendVerificationEmail: () => Promise<{ error: AuthError | null }>;
   isEmailVerified: () => boolean;
@@ -81,11 +81,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await supabase.auth.signOut();
     },
     resetPassword: async (email: string) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) {
-        throw error;
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        
+        logAuthError('resetPassword', error);
+        
+        return { 
+          error,
+          errorMessage: error ? getErrorMessage(error) : null 
+        };
+      } catch (err) {
+        const error = err as AuthError;
+        logAuthError('resetPassword', error);
+        return { 
+          error,
+          errorMessage: error.message || 'Failed to send reset password email' 
+        };
       }
     },
     updatePassword: async (password: string) => {

@@ -24,9 +24,12 @@ export default function ForgotPasswordForm() {
     setLoading(true);
 
     try {
-      const { error } = await resetPassword(values.email);
-      if (error) throw error;
-      setSuccess(true);
+      const result = await resetPassword(values.email);
+      if (result.error) {
+        setError(result.error.message || 'Failed to send reset email');
+      } else {
+        setSuccess(true);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send reset email');
     } finally {
