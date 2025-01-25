@@ -81,6 +81,18 @@ class AuthLogger {
   public clearLogs(): void {
     this.logs = [];
   }
+
+  public logPerformanceMetric(metricName: string, value: number): void {
+    const logEntry: LogEntry = {
+      timestamp: new Date().toISOString(),
+      method: 'PERFORMANCE',
+      type: 'info',
+      message: `${metricName}: ${value}ms`,
+    };
+
+    this.logs.push(logEntry);
+    this.sendToMonitoringService(logEntry);
+  }
 }
 
 export const authLogger = AuthLogger.getInstance(); 

@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { ConfigProvider } from 'antd';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import '../styles/globals.css';
+import { usePerfMetrics } from '@/lib/hooks/usePerfMetrics';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,6 +18,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  usePerfMetrics();
+  
   return (
     <html lang="en">
       <body className={inter.className}>

@@ -15,7 +15,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const pathname = usePathname();
 
   React.useEffect(() => {
-    if (!loading && !user && pathname !== '/auth/login' && pathname !== '/auth/signup') {
+    if (!loading && !user && !['/auth/login', '/auth/signup'].includes(pathname)) {
       router.push('/auth/login');
     }
   }, [user, loading, router, pathname]);
@@ -23,12 +23,12 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Spin size="large" />
+        <Spin size="large" data-testid="loading-spinner" />
       </div>
     );
   }
 
-  if (!user && pathname !== '/auth/login' && pathname !== '/auth/signup') {
+  if (!user && !['/auth/login', '/auth/signup'].includes(pathname)) {
     return null;
   }
 

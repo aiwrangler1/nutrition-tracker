@@ -1,108 +1,111 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Progress, Card, Row, Col, Typography, List, Spin } from 'antd';
-import { withAuth } from '@/lib/auth/withAuth';
-import { supabase } from '@/lib/supabaseClient';
+import { Progress, Card, Row, Col, Typography, List, Spin, Alert } from 'antd';
 import { useAuth } from '@/lib/auth/AuthContext';
+import useSWR from 'swr';
+import { supabase } from '@/lib/supabaseClient';
 
 const { Title, Text } = Typography;
 
-interface DailyNutrition {
-  totalCalories: number;
-  totalProtein: number;
-  totalCarbs: number;
-  totalFat: number;
+interface DashboardData {
+  nutrition: {
+    totalCalories: number;
+    totalProtein: number;
+    totalCarbs: number;
+    totalFat: number;
+  };
+  meals: Array<{
+    id: string;
+    food_name: string;
+    servings: number;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }>;
+  goals: {
+    calorieGoal: number;
+    proteinGoal: number;
+    carbGoal: number;
+    fatGoal: number;
+  };
 }
 
-interface MealEntry {
-  id: string;
-  food_name: string;
-  servings: number;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-}
+const fetcher = async (url: string, userId: string) => {
+  const today = new Date().toISOString().split('T')[0];
+  
+  const { data: mealData } = await supabase
+    .from('meal_entries')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('created_at', `${today}T00:00:00`)
+    .lte('created_at', `${today}T23:59:59`);
+
+  const { data: goalsData } = await supabase
+    .from('user_goals')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  const nutrition = mealData?.reduce((acc, meal) => ({
+    totalCalories: acc.totalCalories + meal.calories,
+    totalProtein: acc.totalProtein + meal.protein,
+    totalCarbs: acc.totalCarbs + meal.carbs,
+    totalFat: acc.totalFat + meal.fat
+  }), { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0 });
+
+  return {
+    nutrition: nutrition || { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0 },
+    meals: mealData || [],
+    goals: goalsData ? {
+      calorieGoal: goalsData.daily_calorie_goal,
+      proteinGoal: goalsData.daily_protein_goal,
+      carbGoal: goalsData.daily_carb_goal,
+      fatGoal: goalsData.daily_fat_goal
+    } : {
+      calorieGoal: 2000,
+      proteinGoal: 150,
+      carbGoal: 250,
+      fatGoal: 70
+    }
+  };
+};
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const [nutrition, setNutrition] = useState<DailyNutrition>({
-    totalCalories: 0,
-    totalProtein: 0,
-    totalCarbs: 0,
-    totalFat: 0
-  });
-  const [meals, setMeals] = useState<MealEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [goals, setGoals] = useState({
-    calorieGoal: 2000,
-    proteinGoal: 150,
-    carbGoal: 250,
-    fatGoal: 70
-  });
+  
+  const { data, error, isLoading } = useSWR(
+    user ? ['/api/dashboard', user.id] : null,
+    ([_, userId]) => fetcher('/api/dashboard', userId),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      refreshInterval: 300000
+    }
+  );
 
-  useEffect(() => {
-    const fetchDailyNutrition = async () => {
-      if (!user) return;
-
-      setLoading(true);
-      try {
-        // Fetch today's meals
-        const today = new Date().toISOString().split('T')[0];
-        const { data: mealData, error: mealError } = await supabase
-          .from('meal_entries')
-          .select('*')
-          .eq('user_id', user.id)
-          .gte('created_at', `${today}T00:00:00`)
-          .lte('created_at', `${today}T23:59:59`);
-
-        // Fetch user goals
-        const { data: goalsData, error: goalsError } = await supabase
-          .from('user_goals')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        if (mealError) throw mealError;
-        if (goalsError) throw goalsError;
-
-        // Calculate totals
-        const calculatedNutrition = mealData.reduce((acc, meal) => ({
-          totalCalories: acc.totalCalories + meal.calories,
-          totalProtein: acc.totalProtein + meal.protein,
-          totalCarbs: acc.totalCarbs + meal.carbs,
-          totalFat: acc.totalFat + meal.fat
-        }), { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0 });
-
-        setNutrition(calculatedNutrition);
-        setMeals(mealData);
-        
-        if (goalsData) {
-          setGoals({
-            calorieGoal: goalsData.daily_calorie_goal,
-            proteinGoal: goalsData.daily_protein_goal,
-            carbGoal: goalsData.daily_carb_goal,
-            fatGoal: goalsData.daily_fat_goal
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDailyNutrition();
-  }, [user]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Spin size="large" />
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Alert 
+          message="Error loading dashboard data" 
+          type="error" 
+          showIcon
+        />
+      </div>
+    );
+  }
+
+  const { nutrition, meals, goals } = data || {};
 
   return (
     <div className="p-6">
@@ -179,4 +182,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default withAuth(Dashboard);
+export default Dashboard;
