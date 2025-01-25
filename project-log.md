@@ -170,54 +170,47 @@ We're building a web application that allows users to:
 
 ## Project Structure Guidelines
 
-### Directory Structure
+### Current Directory Structure
 ```
-my-meal-logger/
-├─ pages/
-│  ├─ api/                       # Serverless functions
-│  │  └─ auth/
-│  │      └─ [...supabase].js    # Custom Supabase auth routes
-│  ├─ meals.js                   # API for handling meal data
-│  ├─ _app.js                    # Global wrapper for styles and Ant Design
-│  ├─ index.js                   # Landing/sign-in screen
-│  ├─ dashboard.js               # Dashboard view with meal logs and progress
-│  └─ settings.js                # Goals configuration page
-├─ components/
-│  ├─ Layout.js                  # Global wrapper structure
-│  ├─ NavBar.js                  # Reusable navigation component
-│  ├─ MealForm.js                # Meal entry form
-│  └─ MacrosChart.js             # Macro tracking visualization
-├─ lib/
-│  └─ supabaseClient.js          # Supabase client initialization
-├─ styles/
-│  └─ globals.css                # Global application styles
-├─ .env.local                    # Local environment variables
-├─ package.json                  # Project dependencies and scripts
-└─ README.md                     # Project documentation
+nutrition-tracker/
+├─ app/                          # Next.js 13+ app directory
+│  ├─ auth/                      # Authentication pages
+│  ├─ dashboard/                 # Dashboard view
+│  ├─ diary/                     # Food diary pages
+│  ├─ settings/                  # Settings pages
+│  ├─ layout.tsx                 # Root layout
+│  └─ page.tsx                   # Landing page
+├─ components/                   # Reusable components
+│  └─ auth/                      # Authentication components
+├─ lib/                         # Utility functions and services
+│  ├─ auth/                     # Authentication context and HOC
+│  └─ utils/                    # Utility functions (logging, etc.)
+├─ public/                      # Static files
+│  └─ favicon.ico               # Site favicon
+├─ styles/                      # Global styles
+│  └─ globals.css               # Global CSS
+├─ types/                       # TypeScript type definitions
+│  └─ index.ts                  # Shared types
+├─ .env.example                 # Environment variables template
+├─ .env.local                   # Local environment variables
+├─ package.json                 # Dependencies and scripts
+└─ README.md                    # Project documentation
 ```
 
-### Folder Management Guidelines
-1. Strict Folder Structure
-   - No custom subfolders in `/components/`, `/pages/`, or `lib/`
-   - Only add folders for core functionality or new reusable components
-   - Minimize file count in each directory
+### Directory Management Status
+✅ Removed empty/unused directories
+✅ Added required public assets
+✅ Consolidated type definitions
+✅ Cleaned up project structure
 
-2. Component Creation Rules
-   - Components must be truly reusable
-   - Avoid creating components for single-use scenarios
-   - Keep component logic minimal and focused
+### Active Directories
+1. `app/` - Next.js pages and routing
+2. `components/` - Reusable React components
+3. `lib/` - Core utilities and services
+4. `public/` - Static assets
+5. `styles/` - Global styling
+6. `types/` - TypeScript definitions
 
-3. File Addition Policy
-   - Any new files must align with core project functionality
-   - Require explicit approval before adding
-   - Maintain clean, purposeful codebase
-
-4. Naming Conventions
-   - Use clear, descriptive names
-   - Follow camelCase for JavaScript/TypeScript files
-   - Use PascalCase for React component files
-
-### Enforcement
-- Regular code reviews to maintain structure
-- Automated linting and structure checks
-- Immediate removal of unnecessary files
+### Removed Directories
+- `supabase/migrations/` - Unused migrations
+- Redundant configuration folders
