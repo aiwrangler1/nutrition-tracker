@@ -1,127 +1,104 @@
 # Nutrition Tracker
 
-A modern web application for tracking nutrition, macros, and health goals with real-time updates.
+A modern web application for tracking daily nutrition and macronutrients, built with Next.js, Ant Design, and Supabase.
 
 ## Features
 
-- Real-time nutrition tracking
-- Customizable macro goals
-- Meal planning and logging
-- Progress visualization
-- Data export capabilities
-- Responsive design
+- Track daily meals and macronutrients
+- Visualize nutrition goals and progress
+- Mobile-friendly responsive design
+- Real-time data synchronization
+- Secure user authentication
 
 ## Tech Stack
 
-- Frontend: React + Vite + TypeScript
-- Backend: Supabase (Auth, Database, Real-time)
-- Styling: TailwindCSS
-- Charts: Chart.js
-- Error Tracking: Sentry
-- CI/CD: GitHub Actions
-
-## Initial Setup
-
-1. Create a new Supabase project at https://supabase.com
-
-2. Clone the repository:
-```bash
-git clone https://github.com/yourusername/nutrition-tracker.git
-cd nutrition-tracker
-```
-
-3. Install dependencies:
-```bash
-npm install
-```
-
-4. Set up environment variables:
-```bash
-cp .env.example .env
-# Add your Supabase URL and anon key to .env
-```
-
-5. Start development server:
-```bash
-npm run dev
-```
-
-## Environment Variables
-
-- `VITE_SUPABASE_URL`: Your Supabase project URL
-- `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
-- `VITE_API_URL`: API URL (if needed for external services)
-- `SENTRY_DSN`: Sentry error tracking URL
-
-## GitHub Setup
-
-1. Create a new repository on GitHub
-2. Initialize and push your local repository:
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/yourusername/nutrition-tracker.git
-git push -u origin main
-```
-
-3. Create a develop branch:
-```bash
-git checkout -b develop
-git push -u origin develop
-```
-
-4. Add GitHub repository secrets:
-- VITE_SUPABASE_URL
-- VITE_SUPABASE_ANON_KEY
-- SENTRY_DSN
-
-## Available Scripts
-
-- `npm run dev`: Start development server
-- `npm run build`: Build for production
-- `npm run lint`: Run ESLint
-- `npm test`: Run tests
-- `npm run preview`: Preview production build
+- **Frontend**: Next.js 14, React 18, Ant Design
+- **Styling**: Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **Deployment**: Render
+- **Language**: TypeScript
+- **Testing**: Coming soon
 
 ## Project Structure
 
 ```
 nutrition-tracker/
-├── src/
-│   ├── components/    # Reusable UI components
-│   ├── pages/        # Page components
-│   ├── hooks/        # Custom React hooks
-│   ├── utils/        # Utility functions
-│   ├── types/        # TypeScript types
-│   └── api/          # Supabase client and queries
-├── public/           # Static assets
-└── docs/            # Documentation
+├── app/                    # Next.js 13+ App Router
+│   ├── dashboard/         # Dashboard page
+│   ├── diary/            # Food diary page
+│   ├── settings/         # User settings page
+│   ├── layout.tsx        # Root layout
+│   └── page.tsx          # Home page
+├── components/            # Reusable components
+├── lib/                   # Utility functions and configs
+│   └── supabaseClient.ts # Supabase client setup
+├── public/               # Static assets
+├── styles/               # Global styles
+├── supabase/             # Supabase configurations
+│   └── migrations/      # Database migrations
+└── types/                # TypeScript type definitions
 ```
 
-## Database Schema
+## Getting Started
 
-Managed through Supabase dashboard:
-- Users (handled by Supabase Auth)
-- Meals
-- Foods
-- UserSettings
-- NutritionGoals
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/nutrition-tracker.git
+   cd nutrition-tracker
+   ```
 
-## Testing
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-- Unit tests: React Testing Library
-- Integration tests: Cypress
-- Run tests: `npm test`
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Fill in your Supabase and Render credentials.
+
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Development
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
 
 ## Deployment
 
-Automated deployment via GitHub Actions:
-1. Push to `main` branch
-2. CI/CD pipeline runs tests
-3. Builds and deploys to production
+The application is automatically deployed to Render through GitHub Actions when changes are pushed to the main branch. The deployment process:
+
+1. Builds the Next.js application
+2. Runs tests and type checking
+3. Deploys to Render using the Render Deploy Action
+
+To set up deployment:
+
+1. Create a new Web Service on Render
+2. Add your repository to Render
+3. Configure the following environment variables in GitHub Actions:
+   - `RENDER_API_KEY`: Your Render API key
+   - `RENDER_SERVICE_ID`: Your Render service ID
+4. Configure the following environment variables in Render:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 

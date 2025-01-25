@@ -1,92 +1,154 @@
-# Project Status & Implementation Log
+# Nutrition Tracker Development Plan
 
-## Current Implementation Status
+## Project Overview
 
-### Frontend Progress (60% Complete)
-✅ Core Dashboard Implementation
-- Real-time data synchronization with Supabase
-- Nutrition tracking and progress bars
-- Meal sections with food lists
-- Delete functionality for foods
-- Loading states and error handling
+We're building a web application that allows users to:
+1. Log daily meals under Breakfast, Lunch, Dinner, or Snacks categories.
+2. Track macros (protein, carbs, fat) and calculate total calories from them automatically.
+3. Visualize daily consumption against user-defined goals (via a dashboard).
+4. Access a settings page to configure personal calorie and macro targets.
 
-🔄 In Progress
-- Settings page
-- Data visualization components
-- Error boundary implementation
+## Tech Stack
 
-### Backend Progress (40% Complete)
-✅ Core Implementation
-- User authentication via Supabase Auth
-- Basic CRUD operations using Supabase
-- Initial database schema
-- Row Level Security (RLS) policies
+- Next.js (React-based framework for server rendering + routing)
+- Ant Design for pre-styled, responsive UI components
+- Node.js runtime (included by default in Next.js)
+- Supabase for database storage and user authentication
+- Simple hosting via GitHub and Render.com
 
-🔄 In Progress
-- Advanced data queries
-- Database optimization
-- Real-time subscription setup
+## Data Model
 
-### DevOps Progress (20% Complete)
-✅ Initial Setup
-- Basic development environment
-- Initial CI configuration
+### Users
+- id (UUID, PK)
+- email (string)
+- password_hash (handled by Supabase's built-in auth)
+- created_at (timestamp)
 
-🔄 In Progress
-- Production environment setup
-- Monitoring implementation
-- Security configurations
+### UserGoals
+- id (UUID, PK)
+- user_id (FK references Users.id)
+- daily_calorie_goal (int)
+- daily_protein_goal (int)
+- daily_carb_goal (int)
+- daily_fat_goal (int)
+- updated_at (timestamp)
 
-## Implementation Queue
+### Meals
+- id (UUID, PK)
+- user_id (FK references Users.id)
+- date (date)
+- meal_type (string/enum [breakfast, lunch, dinner, snacks])
 
-### Infrastructure Phase
-1. Repository Structure
-```bash
-nutrition-tracker/
-├── .github/
-│   └── workflows/
-│       ├── ci.yml
-│       └── deploy.yml
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── hooks/
-│   ├── utils/
-│   ├── types/
-│   └── api/
-├── public/
-└── docs/
-```
+### MealEntries
+- id (UUID, PK)
+- meal_id (FK references Meals.id)
+- food_name (string)
+- serving_size (numeric/string)
+- servings (numeric)
+- protein (float)
+- carbs (float)
+- fat (float)
+- calories (float)
 
-2. Environment Setup
-- Development environment configuration
-- Supabase project setup
-- Sentry integration
-- CI/CD pipeline implementation
+## Implementation Status
 
-3. Core Features
-- Complete Diary Page
-- Implement Settings
-- Add Data Visualization
-- Deploy Error Boundaries
+### 1. Project Setup ✅
+- Migrated from Vite to Next.js
+- Set up Ant Design with responsive layout
+- Configured Supabase client
+- Created project structure following Next.js 13+ conventions
+- Cleaned up unnecessary files and directories
+- Updated all configurations (TypeScript, ESLint)
 
-### Team Coordination
-- AI Frontend Developer: UI/UX implementation
-- AI Backend Developer: Supabase schema and RLS policies
-- AI DevOps Engineer: Infrastructure and deployment
-- Project Lead (Charlie K.): Architecture and integration
+### 2. Authentication ✅
+- ✅ Created AuthContext and AuthProvider
+- ✅ Implemented login functionality
+- ✅ Added authentication guard (withAuth HOC)
+- ✅ Created protected routes
+- ✅ Added loading states and error handling
+- ✅ Implemented password reset
+- ✅ Implemented sign-up functionality
+- ✅ Added email verification flow
+- ✅ Implemented comprehensive error handling
 
-## Technical Decisions
-- Stack: React + Vite + TypeScript
-- Backend: Supabase (Auth, Database, Real-time)
-- TailwindCSS for styling
-- Chart.js for data visualization
-- Sentry for error tracking
-- GitHub Actions for CI/CD
+### Authentication Improvements
+- Enhance error handling with more descriptive user feedback
+- Implement comprehensive email verification flow
+- Add OAuth provider integration (NO. I'LL DO IT LATER)
+- Create more granular authentication state management
 
-## Notes
-- Leveraging Supabase for real-time updates
-- Implementing Row Level Security (RLS)
-- Focus on responsive design
-- Comprehensive error handling
-- Security-first approach
+### Next Authentication Enhancements
+1. Improve Error Handling
+   - Develop user-friendly error messages
+   - Create centralized error handling mechanism
+   - Add logging for authentication events
+
+2. Email Verification
+   - Implement email verification process
+   - Add resend verification email functionality
+   - Create verification status tracking
+
+
+### 3. Dashboard ✅
+- ✅ Created responsive dashboard layout
+- ✅ Implemented calorie progress circle
+- ✅ Added macronutrient progress bars
+- ✅ Created meal list with edit functionality
+- ✅ Added loading states
+- ✅ Implemented Supabase data fetching
+
+### 4. Settings Page ✅
+- ✅ Created user goals configuration form
+- ✅ Added input validation
+- ✅ Created loading states
+- ✅ Implemented data persistence
+- ✅ Added form submission handling
+
+### 5. Food Diary 🚧
+- Created responsive food diary table
+- Added meal type categorization
+- Implemented daily totals summary
+- Added date picker for navigation
+- Created edit/delete actions
+- TODO: Implement data persistence
+- TODO: Add meal entry modal
+
+### 6. Deployment 🚧
+- Configured Render Web Service
+- Set up GitHub Actions workflow
+- Added environment variables
+- TODO: Set up preview environments
+- TODO: Configure health checks
+
+## Next Steps
+
+1. Complete Authentication Flow
+   - Implement sign-up functionality
+   - Add password reset flow
+   - Create email verification
+   - Add OAuth providers
+
+2. Data Integration
+   - Implement Supabase data fetching
+   - Add data persistence
+   - Set up real-time updates
+   - Add error handling
+
+3. Feature Completion
+   - Create meal entry modal
+   - Implement edit/delete functionality
+   - Add date-based filtering
+   - Complete settings persistence
+
+4. Testing & Optimization
+   - Set up testing infrastructure
+   - Add error boundaries
+   - Optimize performance
+   - Implement monitoring
+
+## Future Enhancements
+- Data Export: CSV or PDF exports of daily logs
+- Charts: Weekly or monthly intake trends
+- Additional Integrations: Barcode scanner, public nutrition databases
+- Push Notifications: Reminders to log meals
+

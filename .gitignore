@@ -1,20 +1,21 @@
 # Dependencies
-node_modules
-.pnp
+/node_modules
+/.pnp
 .pnp.js
 
 # Testing
-coverage
+/coverage
+
+# Next.js
+/.next/
+/out/
 
 # Production
-dist
-dist-ssr
-*.local
+/build
 
 # Environment files
+.env*.local
 .env
-.env.*
-!.env.example
 
 # Logs
 logs
@@ -39,3 +40,16 @@ lerna-debug.log*
 # Misc
 *.local
 .eslintcache
+
+# Misc
+*.pem
+
+# Vercel
+.vercel
+
+# Typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# OS
+Thumbs.db
