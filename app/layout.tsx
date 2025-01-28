@@ -1,10 +1,8 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { ConfigProvider } from 'antd';
-import { AuthProvider } from '@/lib/auth/AuthContext';
+import ClientLayout from '@/components/layout/ClientLayout';
 import '../styles/globals.css';
-import { usePerfMetrics } from '@/lib/hooks/usePerfMetrics';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,22 +16,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  usePerfMetrics();
-  
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <ConfigProvider
-            theme={{
-              token: {
-                colorPrimary: '#1890ff',
-              },
-            }}
-          >
-            {children}
-          </ConfigProvider>
-        </AuthProvider>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

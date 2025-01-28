@@ -12,30 +12,38 @@ body {
   background: rgb(var(--background-rgb));
   margin: 0;
   padding: 0;
+  min-height: 100vh;
 }
 
+/* Ant Design Overrides */
 .ant-layout {
-  background: rgb(var(--background-rgb));
+  background: rgb(var(--background-rgb)) !important;
 }
 
 .ant-layout-header {
-  padding: 0 1rem;
-  height: 64px;
-  line-height: 64px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  @apply bg-white shadow-sm px-4 flex items-center h-16;
+  line-height: 1;
 }
 
 .ant-menu {
-  background: transparent;
+  @apply border-none flex items-center;
 }
 
+.ant-menu-item {
+  @apply flex items-center;
+}
+
+.ant-menu-horizontal {
+  @apply border-b-0;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .ant-layout-header {
-    padding: 0 0.5rem;
+    @apply px-2;
   }
-  
+
   .ant-menu-item {
-    padding: 0 0.5rem !important;
+    @apply px-2;
   }
 }

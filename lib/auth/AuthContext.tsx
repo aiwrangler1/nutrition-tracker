@@ -1,60 +1,161 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, AuthError } from '@supabase/supabase-js';
+import { User, AuthError, Provider } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
 import { authLogger } from '../utils/logger';
 
-interface AuthContextType {
+interface AuthState {
   user: User | null;
   loading: boolean;
+  signInAttempts: number;
+  lastAttemptTime: number | null;
+}
+
+interface AuthContextType extends Omit<AuthState, 'signInAttempts' | 'lastAttemptTime'> {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: AuthError | null, needsEmailVerification?: boolean }>;
+  signUp: (email: string, password: string) => Promise<{ error: AuthError | null; needsEmailVerification?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   updatePassword: (password: string) => Promise<{ error: AuthError | null }>;
   resendVerificationEmail: () => Promise<{ error: AuthError | null }>;
   isEmailVerified: () => boolean;
+  refreshSession: () => Promise<{ error: AuthError | null }>;
+  signInWithProvider: (provider: Provider) => Promise<{ error: AuthError | null }>;
+  getRemainingAttempts: () => number;
+  getTimeUntilUnlock: () => number | null;
 }
+
+const MAX_SIGN_IN_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    loading: true,
+    signInAttempts: 0,
+    lastAttemptTime: null,
+  });
+
+  const resetAttempts = () => {
+    setState(prev => ({ ...prev, signInAttempts: 0, lastAttemptTime: null }));
+  };
+
+  const incrementAttempts = () => {
+    setState(prev => ({
+      ...prev,
+      signInAttempts: prev.signInAttempts + 1,
+      lastAttemptTime: Date.now(),
+    }));
+  };
+
+  const getRemainingAttempts = () => {
+    return MAX_SIGN_IN_ATTEMPTS - state.signInAttempts;
+  };
+
+  const getTimeUntilUnlock = () => {
+    if (!state.lastAttemptTime || state.signInAttempts < MAX_SIGN_IN_ATTEMPTS) {
+      return null;
+    }
+    const timeElapsed = Date.now() - state.lastAttemptTime;
+    return Math.max(0, LOCKOUT_DURATION - timeElapsed);
+  };
+
+  const isLockedOut = () => {
+    const timeUntilUnlock = getTimeUntilUnlock();
+    return timeUntilUnlock !== null && timeUntilUnlock > 0;
+  };
 
   useEffect(() => {
     // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        setState(prev => ({ ...prev, user: session?.user ?? null }));
+      } catch (error) {
+        authLogger.logAuthError('initializeAuth', error as AuthError);
+      } finally {
+        setState(prev => ({ ...prev, loading: false }));
+      }
+    };
 
-    // Listen for changes on auth state (signed in, signed out, etc.)
+    initializeAuth();
+
+    // Listen for changes on auth state
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setState(prev => ({ 
+        ...prev, 
+        user: session?.user ?? null,
+        loading: false 
+      }));
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const value = {
-    user,
-    loading,
-    signIn: async (email: string, password: string) => {
+  const refreshSession = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.refreshSession();
+      if (error) throw error;
+      setState(prev => ({ ...prev, user: session?.user ?? null }));
+      return { error: null };
+    } catch (error) {
+      authLogger.logAuthError('refreshSession', error as AuthError);
+      return { error: error as AuthError };
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      if (isLockedOut()) {
+        const timeUntilUnlock = getTimeUntilUnlock();
+        throw new Error(`Account locked. Try again in ${Math.ceil(timeUntilUnlock! / 60000)} minutes`);
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      authLogger.logAuthError('signIn', error);
-      return { 
-        error,
-        errorMessage: error ? getErrorMessage(error) : null 
-      };
-    },
+
+      if (error) {
+        incrementAttempts();
+        throw error;
+      }
+
+      resetAttempts();
+      return { error: null };
+    } catch (error) {
+      authLogger.logAuthError('signIn', error as AuthError);
+      return { error: error as AuthError };
+    }
+  };
+
+  const signInWithProvider = async (provider: Provider) => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      authLogger.logAuthError('signInWithProvider', error as AuthError);
+      return { error: error as AuthError };
+    }
+  };
+
+  const value = {
+    user: state.user,
+    loading: state.loading,
+    signIn: signIn,
     signUp: async (email: string, password: string) => {
       const { error, data } = await supabase.auth.signUp({
         email,
@@ -98,20 +199,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error };
     },
     resendVerificationEmail: async () => {
-      if (!user || !user.email) {
+      if (!state.user || !state.user.email) {
         return { error: { name: 'Error', message: 'No user email found' } as AuthError };
       }
       
       const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: user.email
+        email: state.user.email
       });
 
       return { error };
     },
     isEmailVerified: () => {
-      return user?.email_confirmed_at !== null;
+      return state.user?.email_confirmed_at !== null;
     },
+    refreshSession,
+    signInWithProvider,
+    getRemainingAttempts,
+    getTimeUntilUnlock,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
