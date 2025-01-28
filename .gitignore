@@ -16,6 +16,7 @@
 # Environment files
 .env*.local
 .env
+.cursorrules
 
 # Logs
 logs
