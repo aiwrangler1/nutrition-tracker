@@ -1,95 +1,92 @@
-# Nutrition Tracker
+# Macro Tracker PWA
 
-A modern web application for tracking daily nutrition and macronutrients, built with Next.js, Ant Design, and Supabase.
+A Progressive Web App for tracking daily macronutrient intake and monitoring nutrition goals. Built with Next.js, Tailwind CSS, and Supabase.
 
 ## Features
 
-- Track daily meals and macronutrients
-- Visualize nutrition goals and progress
-- Mobile-friendly responsive design
-- Real-time data synchronization
-- Secure user authentication
+- 📱 Mobile-first Progressive Web App
+- 🍽️ Manual meal and food logging
+- 📊 Real-time macro tracking
+- 📈 Analytics and trend visualization
+- ⚡ Offline support
+- 🎯 Customizable macro goals
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14, React 18, Ant Design
+- **Frontend**: Next.js 14 with App Router
 - **Styling**: Tailwind CSS
-- **Backend**: Supabase (PostgreSQL + Auth)
-- **Deployment**: Render
-- **Language**: TypeScript
-- **Testing**: Coming soon
-
-## Project Structure
-
-```
-nutrition-tracker/
-├── app/                    # Next.js 13+ App Router
-│   ├── dashboard/         # Dashboard page
-│   ├── diary/            # Food diary page
-│   ├── settings/         # User settings page
-│   ├── layout.tsx        # Root layout
-│   └── page.tsx          # Home page
-├── components/            # Reusable components
-├── lib/                   # Utility functions and configs
-│   └── supabaseClient.ts # Supabase client setup
-├── public/               # Static assets
-├── styles/               # Global styles
-├── supabase/             # Supabase configurations
-│   └── migrations/      # Database migrations
-└── types/                # TypeScript type definitions
-```
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Charts**: Chart.js with react-chartjs-2
+- **PWA**: next-pwa
+- **Icons**: Heroicons
 
 ## Getting Started
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/nutrition-tracker.git
-   cd nutrition-tracker
+### Prerequisites
+
+- Node.js 18.17 or later
+- npm 9.x or later
+- A Supabase account and project
+
+### Environment Setup
+
+1. Clone the repository
+2. Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Installation
 
-3. Set up environment variables:
-   ```bash
-   cp .env.example .env.local
-   ```
-   Fill in your Supabase and Render credentials.
+```bash
+# Install dependencies
+npm install
 
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+# Run the development server
+npm run dev
+```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+The app will be available at [http://localhost:3000](http://localhost:3000)
+
+### Database Setup
+
+1. Set up your Supabase project
+2. Run the database migrations:
+   ```bash
+   npm run db:migrate
+   ```
+3. (Optional) Seed the database with sample data:
+   ```bash
+   npm run db:seed
+   ```
 
 ## Development
 
+### Project Structure
+
+```
+/my-macro-tracker-app
+├── public/                # Static assets and PWA manifest
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   ├── components/       # Reusable UI components
+│   ├── hooks/           # Custom React hooks
+│   ├── services/        # API and database services
+│   ├── types/           # TypeScript types
+│   └── utils/           # Utility functions
+├── supabase/            # Supabase configurations
+└── ...config files
+```
+
+### Available Scripts
+
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
-- `npm run start` - Start production server
+- `npm start` - Start production server
 - `npm run lint` - Run ESLint
-
-## Deployment
-
-The application is automatically deployed to Render through GitHub Actions when changes are pushed to the main branch. The deployment process:
-
-1. Builds the Next.js application
-2. Runs tests and type checking
-3. Deploys to Render using the Render Deploy Action
-
-To set up deployment:
-
-1. Create a new Web Service on Render
-2. Add your repository to Render
-3. Configure the following environment variables in GitHub Actions:
-   - `RENDER_API_KEY`: Your Render API key
-   - `RENDER_SERVICE_ID`: Your Render service ID
-4. Configure the following environment variables in Render:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `npm run type-check` - Run TypeScript compiler check
 
 ## Contributing
 
@@ -101,4 +98,4 @@ To set up deployment:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
